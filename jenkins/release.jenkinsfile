@@ -11,7 +11,7 @@ pipeline {
 
   stages {
     stage('Deploy') {
-        when {expression { !VERSION.endsWith("SNAPSHOT")}}
+      when {expression { !VERSION.endsWith("SNAPSHOT")}}
       steps {
         script {
           currentBuild.description = "$ARTIFACT_ID $VERSION"
