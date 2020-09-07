@@ -1,0 +1,29 @@
+library "jenkins-shared-libraries@$env.DEFAULT_LIBRARY_BRANCH"
+pipeline {
+
+  agent any
+
+  environment {
+    def mavenPom = readMavenPom()
+    VERSION = mavenPom.getVersion()
+    ARTIFACT_ID = mavenPom.getArtifactId()
+  }
+
+  stages {
+    stage('Deploy') {
+      when {expression { !VERSION.endsWith("SNAPSHOT")}}
+      steps {
+        script {
+          currentBuild.description = "$ARTIFACT_ID $VERSION"
+          mvn(["clean package deploy",
+              "--activate-profiles ginmon-internal"])
+        }
+      }
+    }
+  }
+  post('Notify Slack') {
+    always {
+      slackNotify(currentBuild.currentResult)
+    }
+  }
+}
