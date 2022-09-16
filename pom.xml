@@ -4,13 +4,13 @@
 
     <groupId>io.github.rkraneis</groupId>
     <artifactId>junit-platform-console-testexecutionlisteners</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <scm>
         <url>https://github.com/ginmon/junit-platform-console-testexecutionlisteners</url>
         <developerConnection>scm:git:git@github.com:ginmon/junit-platform-console-testexecutionlisteners.git</developerConnection>
-        <tag>v2.0.0</tag>
+        <tag>HEAD</tag>
     </scm>
     <!-- Where to deploy the resulting artifacts -->
     <distributionManagement>
