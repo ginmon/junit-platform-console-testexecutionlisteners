@@ -1,4 +1,5 @@
-library "jenkins-shared-libraries@$env.DEFAULT_LIBRARY_BRANCH"
+library identifier: "jenkins-shared-libraries@$env.DEFAULT_LIBRARY_BRANCH", changelog: false
+
 pipeline {
 
   agent any
