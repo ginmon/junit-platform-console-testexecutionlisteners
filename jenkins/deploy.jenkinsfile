@@ -1,8 +1,7 @@
 library identifier: "jenkins-shared-libraries@$env.DEFAULT_LIBRARY_BRANCH", changelog: false
 
 pipeline {
-
-  agent any
+  agent { label 'ec2-agent-base' }
 
   environment {
     def mavenPom = readMavenPom()
@@ -17,7 +16,8 @@ pipeline {
         script {
           currentBuild.description = "$ARTIFACT_ID $VERSION"
           mvn(["clean package deploy",
-              "--activate-profiles ginmon-internal"])
+              "--activate-profiles ginmon-internal"],
+                  jdk: "LATEST_BASE")
         }
       }
     }
