@@ -17,7 +17,7 @@ pipeline {
           currentBuild.description = "$ARTIFACT_ID $VERSION"
           mvn(["clean package deploy",
               "--activate-profiles ginmon-internal"],
-                  jdk: "LATEST_BASE")
+                  jdk: "JAVA21")
         }
       }
     }
