@@ -1,3 +1,7 @@
 library identifier: "jenkins-shared-libraries@$env.DEFAULT_LIBRARY_BRANCH", changelog: false
 
-branchVerify(mvnArgs: ["--activate-profiles ginmon-internal"])
+branchVerify(
+    jenkinsAgent: "ec2-agent-base",
+    mvnArgs: ["--activate-profiles ginmon-internal"],
+    jdk: "JAVA21"
+)

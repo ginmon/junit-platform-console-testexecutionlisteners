@@ -4,13 +4,13 @@
 
     <groupId>io.github.rkraneis</groupId>
     <artifactId>junit-platform-console-testexecutionlisteners</artifactId>
-    <version>2.1.0</version>
+    <version>3.0.0</version>
     <packaging>jar</packaging>
 
     <scm>
         <url>https://github.com/ginmon/junit-platform-console-testexecutionlisteners</url>
         <developerConnection>scm:git:git@github.com:ginmon/junit-platform-console-testexecutionlisteners.git</developerConnection>
-        <tag>v2.1.0</tag>
+        <tag>v3.0.0</tag>
     </scm>
     <!-- Where to deploy the resulting artifacts -->
     <distributionManagement>
@@ -25,20 +25,20 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven.compiler.release>17</maven.compiler.release>
+        <maven.compiler.release>21</maven.compiler.release>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-engine</artifactId>
-            <version>1.10.3</version>
+            <version>1.12.2</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
-            <version>1.10.3</version>
+            <version>1.12.2</version>
             <type>jar</type>
         </dependency>
     </dependencies>
@@ -48,7 +48,7 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.13.0</version>
+                    <version>3.14.0</version>
                     <configuration>
                         <compilerArguments>
                             <Xmaxerrs>10000</Xmaxerrs>
@@ -63,7 +63,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.1.1</version>
                     <configuration>
                         <tagNameFormat>v@{project.version}</tagNameFormat>
                     </configuration>

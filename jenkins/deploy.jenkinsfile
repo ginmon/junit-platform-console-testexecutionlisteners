@@ -1,8 +1,6 @@
 library identifier: "jenkins-shared-libraries@$env.DEFAULT_LIBRARY_BRANCH", changelog: false
-
 pipeline {
-
-  agent any
+  agent { label 'ec2-agent-base' }
 
   environment {
     def mavenPom = readMavenPom()
@@ -11,17 +9,25 @@ pipeline {
   }
 
   stages {
-    stage('Deploy') {
-      when {expression { VERSION.endsWith("SNAPSHOT")}}
+    stage('Test') {
       steps {
         script {
           currentBuild.description = "$ARTIFACT_ID $VERSION"
-          mvn(["clean package deploy",
-              "--activate-profiles ginmon-internal"])
         }
+        mvnCleanInstall(mvnArgs: ["--activate-profiles ginmon-internal,jenkins"], jdk: "JAVA21")
+
+      }
+    }
+
+    stage('Deploy') {
+      when {expression { VERSION.endsWith("SNAPSHOT")}}
+      steps {
+        // deploy
+        mvnDeploy(mvnArgs: ["--activate-profiles ginmon-internal,jenkins"], jdk: "JAVA21")
       }
     }
   }
+
   post('Notify Slack') {
     always {
       slackNotify(currentBuild.currentResult)
