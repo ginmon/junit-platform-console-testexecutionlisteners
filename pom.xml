@@ -4,7 +4,14 @@
 
     <groupId>io.github.rkraneis</groupId>
     <artifactId>junit-platform-console-testexecutionlisteners</artifactId>
-    <version>3.0.1-SNAPSHOT</version>
+    <!--
+      CI-friendly version. <revision> is set once to the 3.0.0-SNAPSHOT base and is never bumped by hand.
+      master builds and tests with this value and never publishes. The production branch publishes
+      3.0.0-<UTC timestamp> via -Drevision (see .github/workflows/publish.yml), so every merge gets
+      a new, immutable, non-SNAPSHOT version that Maven orders by time (dependabot needs that).
+      ci-friendly-flatten-maven-plugin rewrites ${revision} in the published POM.
+    -->
+    <version>${revision}</version>
     <packaging>jar</packaging>
 
     <scm>
@@ -26,6 +33,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.release>21</maven.compiler.release>
+        <revision>3.0.0-SNAPSHOT</revision>
     </properties>
 
     <dependencies>
@@ -44,6 +52,22 @@
     </dependencies>
 
     <build>
+        <plugins>
+            <!-- Replaces ${revision} with the resolved version in the flattened POM. -->
+            <plugin>
+                <groupId>com.outbrain.swinfra</groupId>
+                <artifactId>ci-friendly-flatten-maven-plugin</artifactId>
+                <version>1.0.28</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>clean</goal>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
         <pluginManagement>
             <plugins>
                 <plugin>
