@@ -55,10 +55,33 @@ jobs:
           role-session-name: GitHubAction-AssumeRoleWithAction
           aws-region: eu-central-1
 
+      # Uses the OIDC role above, so no long-lived CodeArtifact token is stored in GitHub. The token is
+      # short-lived (12h) and masked in logs. ginmon/gh-actions is private and not resolvable from this repo.
       - name: Configure Maven for CodeArtifact
-        uses: ginmon/gh-actions/setup-maven@main
-        with:
-          codeartifact-token: ${{ secrets.CODEARTIFACT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ENDPOINT=$(aws codeartifact get-repository-endpoint \
+            --domain ginmon --domain-owner 735822157553 \
+            --repository internal --format maven \
+            --query repositoryEndpoint --output text)
+          TOKEN=$(aws codeartifact get-authorization-token \
+            --domain ginmon --domain-owner 735822157553 \
+            --query authorizationToken --output text)
+          echo "::add-mask::${TOKEN}"
+          mkdir -p "${HOME}/.m2"
+          cat > "${HOME}/.m2/settings.xml" <<EOF
+          <settings>
+            <servers>
+              <server>
+                <id>ginmon-internal</id>
+                <username>aws</username>
+                <password>${TOKEN}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+          echo "CodeArtifact Maven endpoint: ${ENDPOINT}"
 
       - name: Publish to CodeArtifact
         shell: bash
