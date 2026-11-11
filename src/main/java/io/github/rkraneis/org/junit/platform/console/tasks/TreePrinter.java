@@ -20,6 +20,7 @@ import static io.github.rkraneis.org.junit.platform.console.tasks.Color.YELLOW;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.platform.commons.util.StringUtils;
@@ -27,6 +28,8 @@ import io.github.rkraneis.org.junit.platform.console.options.Theme;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.TestExecutionResult.Status;
 import org.junit.platform.engine.reporting.ReportEntry;
+import org.junit.platform.engine.support.descriptor.MethodSource;
+import org.junit.platform.launcher.TestIdentifier;
 
 /**
  * @since 1.0
@@ -86,7 +89,7 @@ class TreePrinter {
 		}
 		out.print(" ");
 		out.print(icon);
-		node.result().ifPresent(result -> printThrowable(tabbed, result));
+		node.result().ifPresent(result -> printThrowable(tabbed, node, result));
 		node.reason().ifPresent(reason -> printMessage(SKIPPED, tabbed, reason));
 		node.reports.forEach(e -> printReportEntry(tabbed, e));
 		out.println();
@@ -108,7 +111,7 @@ class TreePrinter {
 		return color(color, caption);
 	}
 
-	private void printThrowable(String indent, TestExecutionResult result) {
+	private void printThrowable(String indent, TreeNode node, TestExecutionResult result) {
 		if (!result.getThrowable().isPresent()) {
 			return;
 		}
@@ -118,6 +121,25 @@ class TreePrinter {
 			message = throwable.toString();
 		}
 		printMessage(FAILED, indent, message);
+
+		// location and id let a reader (human or agent) jump straight to the failing test
+		String className = node.identifier().flatMap(TreePrinter::methodClassName).orElse("");
+		AgentReportingListener.locate(throwable, className).ifPresent(frame -> {
+			out.println();
+			out.print(indent);
+			out.print(color(FAILED, "at " + frame.getFileName() + ":" + frame.getLineNumber()));
+		});
+		node.identifier().ifPresent(id -> {
+			out.println();
+			out.print(indent);
+			out.print(color(CONTAINER, "id " + id.getUniqueId()));
+		});
+	}
+
+	private static Optional<String> methodClassName(TestIdentifier identifier) {
+		return identifier.getSource()
+				.filter(MethodSource.class::isInstance)
+				.map(source -> ((MethodSource) source).getClassName());
 	}
 
 	private void printReportEntry(String indent, ReportEntry reportEntry) {
