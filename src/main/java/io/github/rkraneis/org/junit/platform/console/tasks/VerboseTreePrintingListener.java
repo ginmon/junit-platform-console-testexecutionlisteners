@@ -183,12 +183,13 @@ public class VerboseTreePrintingListener implements TestExecutionListener {
 		}
 		// still here? Split format into separate lines and indent them from the second line on
 		String[] lines = format.split("\\R");
-		printf(color, lines[0]);
+		// user text (exception messages, skip reasons) is an argument, never part of the format string
+		printf(color, "%s", lines[0]);
 		if (lines.length > 1) {
 			String delimiter = System.lineSeparator() + verticals + String.format(detailFormat + "    ", "");
 			for (int i = 1; i < lines.length; i++) {
 				printf(NONE, delimiter);
-				printf(color, lines[i].replace("%", "%%"));
+				printf(color, "%s", lines[i]);
 			}
 		}
 		printf(NONE, "%n");

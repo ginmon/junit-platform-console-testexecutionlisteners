@@ -1,0 +1,37 @@
+# Runs on every PR targeting master or production. Builds and tests the library only.
+# No AWS or CodeArtifact access needed: the build resolves dependencies from Maven Central.
+name: Verify (PR)
+
+on:
+  pull_request:
+    branches:
+      - master
+      - production
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: verify
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: corretto
+          java-version: '21'
+          cache: maven
+
+      - name: Build and test
+        run: mvn --batch-mode --no-transfer-progress verify

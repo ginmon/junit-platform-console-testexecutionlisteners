@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn verify)",
+      "Bash(mvn test)",
+      "Bash(mvn compile)",
+      "Bash(mvn -q verify)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(rg *)",
+      "Bash(fd *)"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean -f*)",
+      "Bash(rm -rf*)",
+      "Bash(mvn deploy*)",
+      "Bash(mvn release*)",
+      "Bash(mvn *release:*)",
+      "Read(.env*)"
+    ]
+  }
+}
