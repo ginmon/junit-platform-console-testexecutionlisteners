@@ -4,30 +4,47 @@ pipeline {
 
   environment {
     def mavenPom = readMavenPom()
-    VERSION = mavenPom.getVersion()
     ARTIFACT_ID = mavenPom.getArtifactId()
   }
 
   stages {
 
-    stage('Test') {
+    // <revision> in pom.xml is set once (3.0.0-SNAPSHOT) and never bumped by hand. readMavenPom() returns
+    // the unresolved ${revision} as the version, so read the property instead. On production the published
+    // version is <base>-<UTC timestamp>, e.g. 3.0.0-20261111103000, passed to Maven as -Drevision.
+    stage('Resolve version') {
       steps {
         script {
-          currentBuild.description = "$ARTIFACT_ID $VERSION"
+          def revision = readMavenPom().getProperties().getProperty('revision')
+          def base = revision.replaceAll(/-SNAPSHOT$/, '')
+          def timestamp = sh(script: 'date -u +%Y%m%d%H%M%S', returnStdout: true).trim()
+          env.REVISION = revision
+          env.PUBLISH_VERSION = "${base}-${timestamp}"
+          currentBuild.description = "$ARTIFACT_ID ${env.REVISION} (publish ${env.PUBLISH_VERSION})"
         }
+      }
+    }
+
+    stage('Test') {
+      steps {
         mvnCleanInstall(mvnArgs: ["--activate-profiles ginmon-internal,jenkins"], jdk: "JAVA21")
       }
     }
 
+    // Only the production branch publishes. master stays SNAPSHOT and never deploys.
     stage('Deploy Release Artifact') {
-      when {expression { !VERSION.endsWith("SNAPSHOT")}}
+      when { branch 'production' }
       steps {
-        // deploy
-        mvnDeploy(mvnArgs: ["--activate-profiles ginmon-internal,jenkins"],
-            jdk: "JAVA21")
+        mvnDeploy(mvnArgs: [
+            "--activate-profiles ginmon-internal,jenkins",
+            "-Drevision=${env.PUBLISH_VERSION}",
+            "-DskipTests"
+          ],
+          jdk: "JAVA21")
       }
     }
   }
+
   post('Notify Slack') {
     always {
       slackNotify(currentBuild.currentResult)
