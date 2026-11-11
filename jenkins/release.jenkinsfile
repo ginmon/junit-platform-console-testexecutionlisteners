@@ -15,12 +15,15 @@ pipeline {
     stage('Resolve version') {
       steps {
         script {
-          def revision = readMavenPom().getProperties().getProperty('revision')
-          def base = revision.replaceAll(/-SNAPSHOT$/, '')
+          // Jenkins script sandbox rejects java.util.Properties.getProperty, so read <revision> with sed.
+          def base = sh(script: "sed -n 's:.*<revision>\\(.*\\)-SNAPSHOT</revision>.*:\\1:p' pom.xml | head -1",
+              returnStdout: true).trim()
           def timestamp = sh(script: 'date -u +%Y%m%d%H%M%S', returnStdout: true).trim()
-          env.REVISION = revision
+          if (!base) {
+            error("No <revision>X-SNAPSHOT</revision> found in pom.xml")
+          }
           env.PUBLISH_VERSION = "${base}-${timestamp}"
-          currentBuild.description = "$ARTIFACT_ID ${env.REVISION} (publish ${env.PUBLISH_VERSION})"
+          currentBuild.description = "$ARTIFACT_ID ${base}-SNAPSHOT (publish ${env.PUBLISH_VERSION})"
         }
       }
     }
