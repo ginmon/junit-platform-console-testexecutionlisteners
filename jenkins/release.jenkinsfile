@@ -30,13 +30,20 @@ pipeline {
 
     stage('Test') {
       steps {
-        mvnCleanInstall(mvnArgs: ["--activate-profiles ginmon-internal,jenkins"], jdk: "JAVA21")
+        mvnCleanInstall(mvnArgs: ["--activate-profiles ginmon-internal,jenkins", "-Drevision=${env.PUBLISH_VERSION}"], jdk: "JAVA21")
       }
     }
 
     // Only the production branch publishes. master stays SNAPSHOT and never deploys.
+    // A plain Git-SCM pipeline (not multibranch) leaves BRANCH_NAME unset and sets GIT_BRANCH to
+    // "origin/production", so `branch 'production'` never matches. Check both.
     stage('Deploy Release Artifact') {
-      when { branch 'production' }
+      when {
+        expression {
+          def branch = env.BRANCH_NAME ?: env.GIT_BRANCH ?: ''
+          return branch == 'production' || branch == 'origin/production'
+        }
+      }
       steps {
         mvnDeploy(mvnArgs: [
             "--activate-profiles ginmon-internal,jenkins",
