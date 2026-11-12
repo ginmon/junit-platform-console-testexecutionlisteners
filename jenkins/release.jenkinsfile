@@ -30,7 +30,7 @@ pipeline {
 
     stage('Test') {
       steps {
-        mvnCleanInstall(mvnArgs: ["--activate-profiles ginmon-internal,jenkins"], jdk: "JAVA21")
+        mvnCleanInstall(mvnArgs: ["--activate-profiles ginmon-internal,jenkins", "-Drevision=${env.PUBLISH_VERSION}"], jdk: "JAVA21")
       }
     }
 
