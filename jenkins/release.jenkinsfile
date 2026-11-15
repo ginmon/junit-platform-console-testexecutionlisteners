@@ -45,12 +45,15 @@ pipeline {
         }
       }
       steps {
-        mvnDeploy(mvnArgs: [
+        // Clean and rebuild at the publish version. Deploying the Test stage's target/ would ship the
+        // 3.0.0-SNAPSHOT jar. mvnDeploy cannot add `clean` (it appends args after `deploy`), so call mvn.
+        mvn([
+            "clean deploy --update-snapshots",
             "--activate-profiles ginmon-internal,jenkins",
             "-Drevision=${env.PUBLISH_VERSION}",
             "-DskipTests"
           ],
-          jdk: "JAVA21")
+          "JAVA21")
       }
     }
   }
